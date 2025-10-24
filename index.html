@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>AR Farbwechsler + Rotation + Verschieben</title>
+<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { margin: 0; overflow: hidden; }
+  #instructions {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-family: sans-serif;
+    background: rgba(0,0,0,0.7);
+    padding: 20px 30px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 999;
+    cursor: pointer;
+    font-size: 1.2em;
+  }
+  #button-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    z-index: 1000;
+    justify-content: center;
+  }
+  button {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+  }
+  .color-button { background: gray; }
+  .rotate-button { background: black; }
+  .move-button { background: teal; }
+</style>
+</head>
+<body>
+
+<div id="instructions">
+  Tippe hier, um die Kamera zu aktivieren und AR zu starten
+</div>
+
+<div id="button-container">
+  <!-- Farbbuttons -->
+  <button class="color-button" style="background:#ff0000" data-color="#ff0000">Rot</button>
+  <button class="color-button" style="background:#00ff00" data-color="#00ff00">Grün</button>
+  <button class="color-button" style="background:#0000ff" data-color="#0000ff">Blau</button>
+
+  <!-- Rotationsbuttons -->
+  <button class="rotate-button" data-rotate="15">⟳ Rechts</button>
+  <button class="rotate-button" data-rotate="-15">⟲ Links</button>
+
+  <!-- Verschiebebuttons -->
+  <button class="move-button" data-move="forward">↑ Vor</button>
+  <button class="move-button" data-move="backward">↓ Zurück</button>
+  <button class="move-button" data-move="left">← Links</button>
+  <button class="move-button" data-move="right">→ Rechts</button>
+</div>
+
+<a-scene id="ar-scene" embedded vr-mode-ui="enabled: false" style="display:none"
+         arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
+
+  <!-- Marker -->
+  <a-marker preset="hiro">
+    <a-entity id="model"
+      gltf-model="url(https://franzmartensid.github.io/Franz-Fridolin/board-handle.gltf)"
+      scale="0.05 0.05 0.05"
+      rotation="0 0 0"
+      position="0 0 0">
+    </a-entity>
+  </a-marker>
+
+  <a-entity camera></a-entity>
+</a-scene>
+
+<script>
+const instructions = document.getElementById('instructions');
+const arScene = document.getElementById('ar-scene');
+const model = document.querySelector('#model');
+
+// Kamera starten
+instructions.addEventListener('click', () => {
+  instructions.style.display = 'none';
+  arScene.style.display = 'block';
+});
+
+// Farbwechsel
+document.querySelectorAll('.color-button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const color = btn.getAttribute('data-color');
+    model.object3D.traverse(node => {
+      if(node.isMesh && node.material){
+        node.material.color.set(color);
+      }
+    });
+  });
+});
+
+// Rotation
+document.querySelectorAll('.rotate-button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const angle = parseFloat(btn.getAttribute('data-rotate'));
+    const rotation = model.getAttribute('rotation');
+    model.setAttribute('rotation', {
+      x: rotation.x,
+      y: rotation.y + angle,
+      z: rotation.z
+    });
+  });
+});
+
+// Verschiebung (2D auf Marker)
+const moveDistance = 0.02; // in Metern (ca. 2 cm)
+document.querySelectorAll('.move-button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const dir = btn.getAttribute('data-move');
+    const pos = model.getAttribute('position');
+    let newPos = { ...pos };
+
+    switch(dir){
+      case 'forward': newPos.z -= moveDistance; break;
+      case 'backward': newPos.z += moveDistance; break;
+      case 'left': newPos.x -= moveDistance; break;
+      case 'right': newPos.x += moveDistance; break;
+    }
+
+    model.setAttribute('position', newPos);
+  });
+});
+</script>
+
+</body>
+</html>
