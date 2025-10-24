@@ -148,7 +148,7 @@ document.querySelectorAll('.move-button').forEach(btn => {
 });
 
 // Skalierung
-const scaleStep = 0.01; // 1 cm pro Klick
+const scaleStep = 0.2; // 1 cm pro Klick
 document.querySelectorAll('.scale-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const scale = model.getAttribute('scale');
@@ -170,3 +170,4 @@ document.querySelectorAll('.scale-button').forEach(btn => {
 </body>
 
 </html>
+
