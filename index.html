@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>AR Farbwechsler mit Buttons</title>
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #f3f3f3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  model-viewer {
+    width: 100%;
+    height: 80%;
+  }
+  #instructions {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #000;
+    font-family: sans-serif;
+    background: rgba(255,255,255,0.8);
+    padding: 8px 12px;
+    border-radius: 8px;
+    z-index: 10;
+  }
+  .color-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    z-index: 10;
+  }
+  .color-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #000;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div id="instructions">
+  Wähle eine Farbe, um das Modell zu ändern.
+</div>
+
+<model-viewer
+  id="arModel"
+  src="https://franzmartensid.github.io/Franz-Fridolin/board-handle.glb"
+  ios-src="https://franzmartensid.github.io/Franz-Fridolin/3dpea.com_ImageToStl.com_Ohne+Titel.usdz"
+  ar
+  ar-modes="quick-look scene-viewer"
+  camera-controls
+  auto-rotate
+  scale="0.15 0.15 0.15"
+  alt="3D Modell">
+</model-viewer>
+
+<div class="color-buttons">
+  <div class="color-button" style="background:#ff0000" data-color="#ff0000"></div>
+  <div class="color-button" style="background:#00ff00" data-color="#00ff00"></div>
+  <div class="color-button" style="background:#0000ff" data-color="#0000ff"></div>
+  <div class="color-button" style="background:#ffff00" data-color="#ffff00"></div>
+  <div class="color-button" style="background:#ff00ff" data-color="#ff00ff"></div>
+</div>
+
+<script>
+  const model = document.querySelector('#arModel');
+  const buttons = document.querySelectorAll('.color-button');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const color = btn.getAttribute('data-color');
+      const mesh = model.model?.scene;
+      if(mesh){
+        mesh.traverse((node) => {
+          if(node.isMesh && node.material){
+            node.material.color.set(color);
+          }
+        });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
