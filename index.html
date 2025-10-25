@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>AR Farbwechsler + Rotation + Verschieben + Skalierung + Texturen + Helligkeit</title>
+<title>AR Farbwechsler + Rotation + Verschieben + Skalierung + Texturen + Helligkeit + Light Toggle</title>
 <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
@@ -90,6 +90,7 @@
   <button class="scale-button" data-scale="down">➖ Kleiner</button>
   <button class="light-button" data-action="increase">💡 Heller</button>
   <button class="light-button" data-action="decrease">💡 Dunkler</button>
+  <button class="light-button" id="toggle-directional">💡 Licht links/rechts</button>
 </div>
 
 <a-scene id="ar-scene" embedded vr-mode-ui="enabled: false" style="display:none"
@@ -101,9 +102,12 @@
       rotation="0 0 0"
       position="0 0.1 0">
     </a-entity>
-    <a-light type="ambient" intensity="1.1"></a-light>
+
+    <!-- Echte Szene-Lichter -->
+    <a-entity light="type: ambient; color: #ffffff; intensity: 0.5"></a-entity>
     <a-light type="directional" position="3 3 1.5" intensity="1.5"></a-light>
   </a-marker>
+
   <a-entity camera></a-entity>
 </a-scene>
 
@@ -188,7 +192,7 @@ document.querySelectorAll('.texture-button').forEach(btn => {
             map: texture,
             metalness:0.3,
             roughness:0.6,
-            emissive: new THREE.Color(0x000000) // Start ohne zusätzliche Helligkeit
+            emissive: new THREE.Color(0x000000)
           });
           node.material.needsUpdate = true;
         }
@@ -202,6 +206,7 @@ const lightStep = 0.1;
 document.querySelectorAll('.light-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const action = btn.getAttribute('data-action');
+    if(!action) return; // Skip Toggle-Button
     model.object3D.traverse(node => {
       if(node.isMesh && node.material){
         if(!node.material.emissive) node.material.emissive = new THREE.Color(0x000000);
@@ -214,6 +219,18 @@ document.querySelectorAll('.light-button').forEach(btn => {
       }
     });
   });
+});
+
+// Toggle Directional Light links/rechts
+const directionalLight = document.querySelector('a-light[type="directional"]');
+let lightToggle = false;
+document.getElementById('toggle-directional').addEventListener('click', () => {
+  lightToggle = !lightToggle;
+  if(lightToggle){
+    directionalLight.setAttribute('position', '-3 3 1.5'); // links
+  } else {
+    directionalLight.setAttribute('position', '3 3 1.5');  // rechts
+  }
 });
 
 // Button-Tap-Animation
