@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>AR Farbwechsler + Rotation + Verschieben + Skalierung</title>
+<title>AR Farbwechsler + Rotation + Verschieben + Skalierung + Texturen</title>
 <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
@@ -86,7 +86,7 @@
          arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
 
   <!-- Marker -->
-    <a-marker preset="hiro" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
+  <a-marker preset="hiro" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
     <a-entity id="model"
       gltf-model="url(https://franzmartensid.github.io/Franz-Fridolin/board-handle.gltf)"
       scale="0.005 0.005 0.005"
@@ -94,9 +94,9 @@
       position="0 0.1 0">
     </a-entity>
 
-    <!-- Licht hinzufügen -->
-    <a-light type="ambient" intensity="0.6"></a-light>
-    <a-light type="directional" position="0 2 2" intensity="1.2"></a-light>
+    <!-- Licht -->
+    <a-light type="ambient" intensity="0.7"></a-light>
+    <a-light type="directional" position="0 2 2" intensity="1.5"></a-light>
   </a-marker>
 
   <a-entity camera></a-entity>
@@ -176,7 +176,7 @@ document.querySelectorAll('.scale-button').forEach(btn => {
   });
 });
 
-// 🌈 Textur-Wechsel
+// 🌈 Textur-Wechsel mit neuem Material
 const textureBaseURL = "https://franzmartensid.github.io/Franz-Fridolin/";
 
 document.querySelectorAll('.texture-button').forEach(btn => {
@@ -190,16 +190,22 @@ document.querySelectorAll('.texture-button').forEach(btn => {
       case 'stone': textureURL = textureBaseURL + 'rock_face_03_diff_4k.jpg'; break;
     }
 
-    const texture = new THREE.TextureLoader().load(textureURL);
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 1);
+    const loader = new THREE.TextureLoader();
+    loader.load(textureURL, texture => {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(1, 1);
 
-    model.object3D.traverse(node => {
-      if (node.isMesh && node.material) {
-        node.material.map = texture;
-        node.material.needsUpdate = true;
-      }
+      model.object3D.traverse(node => {
+        if (node.isMesh) {
+          node.material = new THREE.MeshStandardMaterial({
+            map: texture,
+            metalness: 0.3,
+            roughness: 0.6
+          });
+          node.material.needsUpdate = true;
+        }
+      });
     });
   });
 });
@@ -207,4 +213,3 @@ document.querySelectorAll('.texture-button').forEach(btn => {
 
 </body>
 </html>
-
