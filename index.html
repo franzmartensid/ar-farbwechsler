@@ -47,6 +47,7 @@
   .rotate-button { background: black; }
   .move-button { background: teal; }
   .scale-button { background: purple; }
+  .texture-button { background: brown; }
 </style>
 </head>
 <body>
@@ -74,6 +75,11 @@
   <!-- Skalierungsbuttons -->
   <button class="scale-button" data-scale="up">➕ Größer</button>
   <button class="scale-button" data-scale="down">➖ Kleiner</button>
+
+  <!-- Textur-Buttons -->
+  <button class="texture-button" data-texture="wood">🌳 Holz</button>
+  <button class="texture-button" data-texture="metal">⚙️ Metall</button>
+  <button class="texture-button" data-texture="stone">🪨 Stein</button>
 </div>
 
 <a-scene id="ar-scene" embedded vr-mode-ui="enabled: false" style="display:none"
@@ -87,6 +93,10 @@
       rotation="0 0 0"
       position="0 0.1 0">
     </a-entity>
+
+    <!-- Licht hinzufügen -->
+    <a-light type="ambient" intensity="0.6"></a-light>
+    <a-light type="directional" position="0 2 2" intensity="1.2"></a-light>
   </a-marker>
 
   <a-entity camera></a-entity>
@@ -165,10 +175,36 @@ document.querySelectorAll('.scale-button').forEach(btn => {
     });
   });
 });
+
+// 🌈 Textur-Wechsel
+const textureBaseURL = "https://franzmartensid.github.io/Franz-Fridolin/";
+
+document.querySelectorAll('.texture-button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.getAttribute('data-texture');
+    let textureURL = '';
+
+    switch (type) {
+      case 'wood': textureURL = textureBaseURL + 'oak_veneer_01_diff_4k.jpg'; break;
+      case 'metal': textureURL = textureBaseURL + 'rusty_metal_04_diff_4k.jpg'; break;
+      case 'stone': textureURL = textureBaseURL + 'rock_face_03_diff_4k.jpg'; break;
+    }
+
+    const texture = new THREE.TextureLoader().load(textureURL);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1, 1);
+
+    model.object3D.traverse(node => {
+      if (node.isMesh && node.material) {
+        node.material.map = texture;
+        node.material.needsUpdate = true;
+      }
+    });
+  });
+});
 </script>
 
 </body>
-
-
 </html>
 
