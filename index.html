@@ -9,32 +9,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body { margin: 0; overflow: hidden; }
+
+  /* Start-Knopf oben */
   #instructions {
     position: absolute;
-    top: 50%;
+    top: 10px;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     color: white;
     font-family: sans-serif;
     background: rgba(0,0,0,0.7);
-    padding: 20px 30px;
+    padding: 15px 25px;
     border-radius: 10px;
     text-align: center;
-    z-index: 999;
+    z-index: 9999;
     cursor: pointer;
     font-size: 1.2em;
   }
-  #button-container {
+
+  /* Linke und rechte Buttons vertikal */
+  .button-group {
     position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 70px; /* unter Start-Button */
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 5px;
     z-index: 1000;
-    justify-content: center;
   }
+
+  .button-group.left { left: 10px; }
+  .button-group.right { right: 10px; }
+
   button {
     padding: 10px 15px;
     border-radius: 5px;
@@ -42,7 +47,9 @@
     cursor: pointer;
     font-weight: bold;
     color: white;
+    font-size: 0.9em;
   }
+
   .color-button { background: gray; }
   .rotate-button { background: black; }
   .move-button { background: teal; }
@@ -53,36 +60,39 @@
 </head>
 <body>
 
-<div id="instructions">
-  Tippe hier, um die Kamera zu aktivieren und AR zu starten
-</div>
+<!-- Start-Knopf oben -->
+<div id="instructions">Tippe hier, um die Kamera zu aktivieren und AR zu starten</div>
 
-<div id="button-container">
-  <!-- Farbbuttons -->
+<!-- Linke Gruppe -->
+<div class="button-group left">
+  <!-- Farben -->
   <button class="color-button" style="background:#ff0000" data-color="#ff0000">Rot</button>
   <button class="color-button" style="background:#00ff00" data-color="#00ff00">Grün</button>
   <button class="color-button" style="background:#0000ff" data-color="#0000ff">Blau</button>
 
-  <!-- Rotationsbuttons -->
+  <!-- Texturen -->
+  <button class="texture-button" data-texture="wood">🌳 Holz</button>
+  <button class="texture-button" data-texture="metal">⚙️ Metall</button>
+  <button class="texture-button" data-texture="stone">🪨 Stein</button>
+</div>
+
+<!-- Rechte Gruppe -->
+<div class="button-group right">
+  <!-- Rotation -->
   <button class="rotate-button" data-rotate="15">⟳ Rechts</button>
   <button class="rotate-button" data-rotate="-15">⟲ Links</button>
 
-  <!-- Verschiebebuttons -->
+  <!-- Verschieben -->
   <button class="move-button" data-move="forward">↑ Vor</button>
   <button class="move-button" data-move="backward">↓ Zurück</button>
   <button class="move-button" data-move="left">← Links</button>
   <button class="move-button" data-move="right">→ Rechts</button>
 
-  <!-- Skalierungsbuttons -->
+  <!-- Skalierung -->
   <button class="scale-button" data-scale="up">➕ Größer</button>
   <button class="scale-button" data-scale="down">➖ Kleiner</button>
 
-  <!-- Textur-Buttons -->
-  <button class="texture-button" data-texture="wood">🌳 Holz</button>
-  <button class="texture-button" data-texture="metal">⚙️ Metall</button>
-  <button class="texture-button" data-texture="stone">🪨 Stein</button>
-
-  <!-- Licht Buttons -->
+  <!-- Licht -->
   <button class="light-button" data-action="increase">💡 Heller</button>
   <button class="light-button" data-action="decrease">💡 Dunkler</button>
   <button class="light-button" data-direction="front">⬆ Vorne</button>
@@ -112,11 +122,11 @@
 </a-scene>
 
 <script>
+// Kamera starten
 const instructions = document.getElementById('instructions');
 const arScene = document.getElementById('ar-scene');
 const model = document.querySelector('#model');
 
-// Kamera starten
 instructions.addEventListener('click', () => {
   instructions.style.display = 'none';
   arScene.style.display = 'block';
@@ -139,29 +149,23 @@ document.querySelectorAll('.rotate-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const angle = parseFloat(btn.getAttribute('data-rotate'));
     const rotation = model.getAttribute('rotation');
-    model.setAttribute('rotation', {
-      x: rotation.x,
-      y: rotation.y + angle,
-      z: rotation.z
-    });
+    model.setAttribute('rotation', { x: rotation.x, y: rotation.y + angle, z: rotation.z });
   });
 });
 
-// Verschiebung (2D auf Marker)
+// Verschiebung
 const moveDistance = 0.9;
 document.querySelectorAll('.move-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const dir = btn.getAttribute('data-move');
     const pos = model.getAttribute('position');
     let newPos = { ...pos };
-
     switch(dir){
       case 'forward': newPos.z -= moveDistance; break;
       case 'backward': newPos.z += moveDistance; break;
       case 'left': newPos.x -= moveDistance; break;
       case 'right': newPos.x += moveDistance; break;
     }
-
     model.setAttribute('position', newPos);
   });
 });
@@ -172,45 +176,30 @@ document.querySelectorAll('.scale-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const scale = model.getAttribute('scale');
     const action = btn.getAttribute('data-scale');
-    let factor = 1;
-
-    if(action === 'up') factor = 1 + scaleStep;
-    if(action === 'down') factor = 1 - scaleStep;
-
-    model.setAttribute('scale', {
-      x: scale.x * factor,
-      y: scale.y * factor,
-      z: scale.z * factor
-    });
+    let factor = action==='up'? 1+scaleStep : 1-scaleStep;
+    model.setAttribute('scale', { x: scale.x*factor, y: scale.y*factor, z: scale.z*factor });
   });
 });
 
-// 🌈 Textur-Wechsel
+// Textur-Wechsel
 const textureBaseURL = "https://franzmartensid.github.io/Franz-Fridolin/";
 document.querySelectorAll('.texture-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const type = btn.getAttribute('data-texture');
     let textureURL = '';
-
     switch (type) {
       case 'wood': textureURL = textureBaseURL + 'oak_veneer_01_diff_4k.jpg'; break;
       case 'metal': textureURL = textureBaseURL + 'rusty_metal_04_diff_4k.jpg'; break;
       case 'stone': textureURL = textureBaseURL + 'rock_face_03_diff_4k.jpg'; break;
     }
-
     const loader = new THREE.TextureLoader();
     loader.load(textureURL, texture => {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(1, 1);
-
+      texture.repeat.set(1,1);
       model.object3D.traverse(node => {
-        if (node.isMesh) {
-          node.material = new THREE.MeshStandardMaterial({
-            map: texture,
-            metalness: 0.3,
-            roughness: 0.6
-          });
+        if(node.isMesh){
+          node.material = new THREE.MeshStandardMaterial({ map: texture, metalness:0.3, roughness:0.6 });
           node.material.needsUpdate = true;
         }
       });
@@ -218,40 +207,36 @@ document.querySelectorAll('.texture-button').forEach(btn => {
   });
 });
 
-// 💡 Lichtsteuerung
+// Lichtsteuerung
 const ambientLight = document.getElementById('ambientLight');
 const directionalLight = document.getElementById('directionalLight');
 const intensityStep = 0.2;
-const positionStep = 0.5;
 
 document.querySelectorAll('.light-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const action = btn.getAttribute('data-action');
     const dir = btn.getAttribute('data-direction');
 
-    // Helligkeit
     if(action){
       let newIntensity = directionalLight.getAttribute('intensity');
-      if(action === 'increase') newIntensity += intensityStep;
-      if(action === 'decrease') newIntensity -= intensityStep;
-      newIntensity = Math.max(0, newIntensity);
+      newIntensity += (action==='increase'? intensityStep : -intensityStep);
+      newIntensity = Math.max(0,newIntensity);
       directionalLight.setAttribute('intensity', newIntensity);
 
       let newAmbient = ambientLight.getAttribute('intensity');
-      newAmbient += (action==='increase'?intensityStep:-intensityStep);
+      newAmbient += (action==='increase'? intensityStep : -intensityStep);
       newAmbient = Math.max(0, Math.min(1.5,newAmbient));
       ambientLight.setAttribute('intensity', newAmbient);
     }
 
-    // Richtung
     if(dir){
       const pos = directionalLight.getAttribute('position');
       let newPos = {...pos};
       switch(dir){
-        case 'front': newPos.z = -2; break;
-        case 'back':  newPos.z = 2; break;
-        case 'left':  newPos.x = -2; break;
-        case 'right': newPos.x = 2; break;
+        case 'front': newPos.z=-2; break;
+        case 'back': newPos.z=2; break;
+        case 'left': newPos.x=-2; break;
+        case 'right': newPos.x=2; break;
       }
       directionalLight.setAttribute('position', newPos);
     }
@@ -261,4 +246,6 @@ document.querySelectorAll('.light-button').forEach(btn => {
 
 </body>
 </html>
+
+
 
