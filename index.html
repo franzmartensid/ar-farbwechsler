@@ -103,13 +103,9 @@
   <button class="scale-button" data-scale="up">➕ Größer</button>
   <button class="scale-button" data-scale="down">➖ Kleiner</button>
 
-  <!-- Licht -->
+  <!-- Licht Heller/Dunkler -->
   <button class="light-button" data-action="increase">💡 Heller</button>
   <button class="light-button" data-action="decrease">💡 Dunkler</button>
-  <button class="light-button" data-direction="front">⬆ Vorne</button>
-  <button class="light-button" data-direction="back">⬇ Hinten</button>
-  <button class="light-button" data-direction="left">⬅ Links</button>
-  <button class="light-button" data-direction="right">➡ Rechts</button>
 </div>
 
 <a-scene id="ar-scene" embedded vr-mode-ui="enabled: false" style="display:none"
@@ -126,7 +122,7 @@
 
     <!-- Licht -->
     <a-light id="ambientLight" type="ambient" intensity="0.7"></a-light>
-    <a-light id="directionalLight" type="directional" position="0 2 2" intensity="1.5"></a-light>
+    <a-light id="directionalLight" type="directional" position="0 2 1.5" intensity="1.5"></a-light>
   </a-marker>
 
   <a-entity camera></a-entity>
@@ -218,57 +214,17 @@ document.querySelectorAll('.texture-button').forEach(btn => {
   });
 });
 
-// Lichtsteuerung
+// Lichtsteuerung (nur Heller/Dunkler)
 const ambientLight = document.getElementById('ambientLight');
 const directionalLight = document.getElementById('directionalLight');
-const intensityStep = 0.2;
+const intensityStep = 0.1;
 
 document.querySelectorAll('.light-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const action = btn.getAttribute('data-action');
-    const dir = btn.getAttribute('data-direction');
+    if(!action) return;
 
-    if(action){
-      let newIntensity = directionalLight.getAttribute('intensity');
-      newIntensity += (action==='increase'? intensityStep : -intensityStep);
-      newIntensity = Math.max(0,newIntensity);
-      directionalLight.setAttribute('intensity', newIntensity);
-
-      let newAmbient = ambientLight.getAttribute('intensity');
-      newAmbient += (action==='increase'? intensityStep : -intensityStep);
-      newAmbient = Math.max(0, Math.min(1.5,newAmbient));
-      ambientLight.setAttribute('intensity', newAmbient);
-    }
-
-    if(dir){
-      const pos = directionalLight.getAttribute('position');
-      let newPos = {...pos};
-      switch(dir){
-        case 'front': newPos.z=-2; break;
-        case 'back': newPos.z=2; break;
-        case 'left': newPos.x=-2; break;
-        case 'right': newPos.x=2; break;
-      }
-      directionalLight.setAttribute('position', newPos);
-    }
-  });
-});
-
-// Button-Tap-Animation
-document.querySelectorAll('button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    btn.classList.add('flash');
-    setTimeout(() => {
-      btn.classList.remove('flash');
-    }, 200);
-  });
-});
-</script>
-
-</body>
-</html>
-
-
-
-
-
+    // AmbientLight
+    let ambientIntensity = ambientLight.getAttribute('intensity');
+    ambientIntensity += (action === 'increase' ? intensityStep : -intensityStep);
+    ambientIntensity = Math.max
