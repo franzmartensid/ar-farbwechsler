@@ -19,21 +19,21 @@
     color: white;
     font-family: sans-serif;
     background: rgba(0,0,0,0.7);
-    padding: 15px 25px;
+    padding: 12px 20px;
     border-radius: 10px;
     text-align: center;
     z-index: 9999;
     cursor: pointer;
-    font-size: 1.2em;
+    font-size: 1.1em;
   }
 
   /* Linke und rechte Buttons vertikal */
   .button-group {
     position: absolute;
-    top: 70px; /* unter Start-Button */
+    top: 60px; /* unter Start-Button */
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
     z-index: 1000;
   }
 
@@ -41,13 +41,13 @@
   .button-group.right { right: 10px; }
 
   button {
-    padding: 10px 15px;
+    padding: 8px 12px;       /* kleiner als vorher */
     border-radius: 5px;
     border: none;
     cursor: pointer;
     font-weight: bold;
     color: white;
-    font-size: 0.9em;
+    font-size: 0.8em;        /* kleiner als vorher */
   }
 
   .color-button { background: gray; }
@@ -56,6 +56,17 @@
   .scale-button { background: purple; }
   .texture-button { background: brown; }
   .light-button { background: orange; }
+
+  /* Aufleuchten beim Tippen */
+  button.flash {
+    animation: flash 0.2s ease;
+  }
+
+  @keyframes flash {
+    0% { transform: scale(1); box-shadow: 0 0 3px white; }
+    50% { transform: scale(1.1); box-shadow: 0 0 15px white; }
+    100% { transform: scale(1); box-shadow: 0 0 3px white; }
+  }
 </style>
 </head>
 <body>
@@ -242,10 +253,22 @@ document.querySelectorAll('.light-button').forEach(btn => {
     }
   });
 });
+
+// Button-Tap-Animation
+document.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.add('flash');
+    setTimeout(() => {
+      btn.classList.remove('flash');
+    }, 200);
+  });
+});
 </script>
 
 </body>
 </html>
+
+
 
 
 
