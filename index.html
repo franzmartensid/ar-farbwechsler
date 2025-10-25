@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>AR Farbwechsler + Rotation + Verschieben + Skalierung + Texturen + Licht</title>
+<title>AR Farbwechsler + Rotation + Verschieben + Skalierung + Texturen + Helligkeit</title>
 <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
@@ -10,7 +10,6 @@
 <style>
   body { margin: 0; overflow: hidden; }
 
-  /* Start-Knopf oben */
   #instructions {
     position: absolute;
     top: 10px;
@@ -27,10 +26,9 @@
     font-size: 1.1em;
   }
 
-  /* Linke und rechte Buttons vertikal */
   .button-group {
     position: absolute;
-    top: 60px; /* unter Start-Button */
+    top: 60px;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -57,7 +55,6 @@
   .texture-button { background: brown; }
   .light-button { background: orange; }
 
-  /* Aufleuchten beim Tippen */
   button.flash {
     animation: flash 0.2s ease;
   }
@@ -71,47 +68,32 @@
 </head>
 <body>
 
-<!-- Start-Knopf oben -->
 <div id="instructions">Tippe hier, um die Kamera zu aktivieren und AR zu starten</div>
 
-<!-- Linke Gruppe -->
 <div class="button-group left">
-  <!-- Farben -->
   <button class="color-button" style="background:#ff0000" data-color="#ff0000">Rot</button>
   <button class="color-button" style="background:#00ff00" data-color="#00ff00">Grün</button>
   <button class="color-button" style="background:#0000ff" data-color="#0000ff">Blau</button>
-
-  <!-- Texturen -->
   <button class="texture-button" data-texture="wood">🌳 Holz</button>
   <button class="texture-button" data-texture="metal">⚙️ Metall</button>
   <button class="texture-button" data-texture="stone">🪨 Stein</button>
 </div>
 
-<!-- Rechte Gruppe -->
 <div class="button-group right">
-  <!-- Rotation -->
   <button class="rotate-button" data-rotate="15">⟳ Rechts</button>
   <button class="rotate-button" data-rotate="-15">⟲ Links</button>
-
-  <!-- Verschieben -->
   <button class="move-button" data-move="forward">↑ Vor</button>
   <button class="move-button" data-move="backward">↓ Zurück</button>
   <button class="move-button" data-move="left">← Links</button>
   <button class="move-button" data-move="right">→ Rechts</button>
-
-  <!-- Skalierung -->
   <button class="scale-button" data-scale="up">➕ Größer</button>
   <button class="scale-button" data-scale="down">➖ Kleiner</button>
-
-  <!-- Licht Heller/Dunkler -->
   <button class="light-button" data-action="increase">💡 Heller</button>
   <button class="light-button" data-action="decrease">💡 Dunkler</button>
 </div>
 
 <a-scene id="ar-scene" embedded vr-mode-ui="enabled: false" style="display:none"
          arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
-
-  <!-- Marker -->
   <a-marker preset="hiro" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
     <a-entity id="model"
       gltf-model="url(https://franzmartensid.github.io/Franz-Fridolin/board-handle.gltf)"
@@ -119,17 +101,13 @@
       rotation="0 0 0"
       position="0 0.1 0">
     </a-entity>
-
-    <!-- Licht (fest) -->
     <a-light type="ambient" intensity="0.7"></a-light>
     <a-light type="directional" position="0 2 1.5" intensity="1.5"></a-light>
   </a-marker>
-
   <a-entity camera></a-entity>
 </a-scene>
 
 <script>
-// Kamera starten
 const instructions = document.getElementById('instructions');
 const arScene = document.getElementById('ar-scene');
 const model = document.querySelector('#model');
@@ -206,7 +184,12 @@ document.querySelectorAll('.texture-button').forEach(btn => {
       texture.repeat.set(1,1);
       model.object3D.traverse(node => {
         if(node.isMesh){
-          node.material = new THREE.MeshStandardMaterial({ map: texture, metalness:0.3, roughness:0.6 });
+          node.material = new THREE.MeshStandardMaterial({
+            map: texture,
+            metalness:0.3,
+            roughness:0.6,
+            emissive: new THREE.Color(0x000000) // Start ohne zusätzliche Helligkeit
+          });
           node.material.needsUpdate = true;
         }
       });
@@ -214,19 +197,20 @@ document.querySelectorAll('.texture-button').forEach(btn => {
   });
 });
 
-// Lichtsteuerung über Materialfarbe (Heller/Dunkler)
-const lightStep = 0.05; // Helligkeit Schrittgröße
+// Licht Heller/Dunkler über emissive
+const lightStep = 0.1;
 document.querySelectorAll('.light-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const action = btn.getAttribute('data-action');
     model.object3D.traverse(node => {
       if(node.isMesh && node.material){
-        const color = node.material.color.clone();
+        if(!node.material.emissive) node.material.emissive = new THREE.Color(0x000000);
         let hsl = {};
-        color.getHSL(hsl);
-        hsl.l += (action === 'increase' ? lightStep : -lightStep);
+        node.material.emissive.getHSL(hsl);
+        hsl.l += (action==='increase'? lightStep : -lightStep);
         hsl.l = Math.min(1, Math.max(0, hsl.l));
-        node.material.color.setHSL(hsl.h, hsl.s, hsl.l);
+        node.material.emissive.setHSL(hsl.h, hsl.s, hsl.l);
+        node.material.needsUpdate = true;
       }
     });
   });
@@ -236,9 +220,7 @@ document.querySelectorAll('.light-button').forEach(btn => {
 document.querySelectorAll('button').forEach(btn => {
   btn.addEventListener('click', () => {
     btn.classList.add('flash');
-    setTimeout(() => {
-      btn.classList.remove('flash');
-    }, 200);
+    setTimeout(() => btn.classList.remove('flash'), 200);
   });
 });
 </script>
