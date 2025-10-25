@@ -38,7 +38,10 @@
   .button-group.left { left: 10px; }
   .button-group.right { right: 10px; }
 
-  button {
+  .button-group button {
+    width: 80px; /* feste Breite für alle Buttons */
+    flex: 0 0 auto; /* verhindern, dass Buttons gestreckt werden */
+    text-align: center;
     padding: 8px 12px;
     border-radius: 5px;
     border: none;
@@ -103,7 +106,7 @@
       position="0 0.1 0">
     </a-entity>
 
-    <!-- Echte Szene-Lichter -->
+    <!-- Lichter -->
     <a-entity light="type: ambient; color: #ffffff; intensity: 0.5"></a-entity>
     <a-light type="directional" position="3 3 1.5" intensity="1.5"></a-light>
   </a-marker>
@@ -143,7 +146,7 @@ document.querySelectorAll('.rotate-button').forEach(btn => {
 });
 
 // Verschiebung
-const moveDistance = 0.45;
+const moveDistance = 0.9;
 document.querySelectorAll('.move-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const dir = btn.getAttribute('data-move');
@@ -206,7 +209,7 @@ const lightStep = 0.1;
 document.querySelectorAll('.light-button').forEach(btn => {
   btn.addEventListener('click', () => {
     const action = btn.getAttribute('data-action');
-    if(!action) return; // Skip Toggle-Button
+    if(!action) return;
     model.object3D.traverse(node => {
       if(node.isMesh && node.material){
         if(!node.material.emissive) node.material.emissive = new THREE.Color(0x000000);
@@ -226,11 +229,7 @@ const directionalLight = document.querySelector('a-light[type="directional"]');
 let lightToggle = false;
 document.getElementById('toggle-directional').addEventListener('click', () => {
   lightToggle = !lightToggle;
-  if(lightToggle){
-    directionalLight.setAttribute('position', '-3 3 1.5'); // links
-  } else {
-    directionalLight.setAttribute('position', '3 3 1.5');  // rechts
-  }
+  directionalLight.setAttribute('position', lightToggle ? '-3 3 1.5' : '3 3 1.5');
 });
 
 // Button-Tap-Animation
@@ -244,7 +243,5 @@ document.querySelectorAll('button').forEach(btn => {
 
 </body>
 </html>
-
-
 
 
