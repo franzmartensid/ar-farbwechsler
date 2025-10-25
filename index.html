@@ -80,12 +80,12 @@
          arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
 
   <!-- Marker -->
-    <a-marker type="pattern" url="https://franzmartensid.github.io/qr-code-als-marker/pattern-frame.patt">
+    <a-marker type="pattern" url="https://franzmartensid.github.io/qr-code-als-marker/pattern-frame.patt" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
     <a-entity id="model"
       gltf-model="url(https://franzmartensid.github.io/Franz-Fridolin/board-handle.gltf)"
       scale="0.005 0.005 0.005"
       rotation="0 0 0"
-      position="0 0 0">
+      position="0 0.1 0">
     </a-entity>
   </a-marker>
 
@@ -168,5 +168,6 @@ document.querySelectorAll('.scale-button').forEach(btn => {
 </script>
 
 </body>
+
 
 </html>
