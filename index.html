@@ -41,13 +41,13 @@
   .button-group.right { right: 10px; }
 
   button {
-    padding: 8px 12px;       /* kleiner als vorher */
+    padding: 8px 12px;
     border-radius: 5px;
     border: none;
     cursor: pointer;
     font-weight: bold;
     color: white;
-    font-size: 0.8em;        /* kleiner als vorher */
+    font-size: 0.8em;
   }
 
   .color-button { background: gray; }
@@ -227,4 +227,30 @@ document.querySelectorAll('.light-button').forEach(btn => {
     // AmbientLight
     let ambientIntensity = ambientLight.getAttribute('intensity');
     ambientIntensity += (action === 'increase' ? intensityStep : -intensityStep);
-    ambientIntensity = Math.max
+    ambientIntensity = Math.max(0.3, Math.min(1.5, ambientIntensity));
+    ambientLight.setAttribute('intensity', ambientIntensity);
+
+    // DirectionalLight
+    let directionalIntensity = directionalLight.getAttribute('intensity');
+    directionalIntensity += (action === 'increase' ? intensityStep : -intensityStep);
+    directionalIntensity = Math.max(0.5, Math.min(2.0, directionalIntensity));
+    directionalLight.setAttribute('intensity', directionalIntensity);
+
+    // Position fixiert leicht vor dem Modell
+    directionalLight.setAttribute('position', { x: 0, y: 2, z: 1.5 });
+  });
+});
+
+// Button-Tap-Animation
+document.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.add('flash');
+    setTimeout(() => {
+      btn.classList.remove('flash');
+    }, 200);
+  });
+});
+</script>
+
+</body>
+</html>
